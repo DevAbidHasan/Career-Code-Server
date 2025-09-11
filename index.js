@@ -1,10 +1,11 @@
 const express = require('express');
+require('dotenv').config();
 const cors = require('cors');
 const port = process.env.PORT || 3000;
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
-require('dotenv').config();
+
 
 
 // middleware
@@ -31,11 +32,33 @@ async function run() {
     
     await client.connect();
 
+    const jobsCollection = client.db('CareerCode').collection('jobs');
+
+    // jobs API
+
+    app.get("/jobs", async (req,res)=>{
+        // const cursor = jobsCollection.find();
+        const result = await jobsCollection.find().toArray();
+        res.send(result);
+    })
+
+    app.get("/jobs/:id" , async (req,res)=>{
+        const id = req.params.id;
+        const query = { _id : new ObjectId(id)};
+        const result = await jobsCollection.findOne(query);
+        res.send(result);
+    })
+
+
+
+
+
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     
-  }
+  } 
 }
 run().catch(console.dir);
 
